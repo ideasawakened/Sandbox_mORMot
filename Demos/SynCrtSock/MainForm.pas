@@ -65,8 +65,8 @@ begin
   vSimple := TSimpleHttpClient.Create();
   try
     edtReturnCode.Text := IntToStr(vSimple.Request(fURI.URI));
-    memHeaders.Text := string(vSimple.Headers);
-    memBody.Text := string(vSimple.Body);
+    memHeaders.Text := utf8tostring(vSimple.Headers);
+    memBody.Text := utf8tostring(vSimple.Body);
   finally
     vSimple.Free();
   end;
@@ -93,8 +93,8 @@ begin
   vWinHTTP := TWinHTTP.Create(fURI.URI);
   try
     edtReturnCode.Text := IntToStr(vWinHTTP.Request(fURI.Address, 'GET', 0, vInHeader, vInData, vInDataType, SockString(vHeaders), SockString(vBody)));
-    memHeaders.Text := string(vHeaders);
-    memBody.Text := string(vBody);
+    memHeaders.Text := utf8tostring(vHeaders);
+    memBody.Text := utf8tostring(vBody);
   finally
     vWinHTTP.Free();
   end;
@@ -132,18 +132,15 @@ begin
         else if fSSL.CACertFile <> '' then begin
           curl.easy_setopt(fHandle,coCAInfo,pointer(fSSL.CACertFile));
     *)
+    //vInHeader := 'Accept-Charset: iso-8859-1';  no one uses anymore: https://hsivonen.fi/accept-charset/
     vCurl.UseClientCertificate('', 'curl-ca-bundle.crt', '', '');
     //To simplify, I added a new CACertFile property via pull request #259 which includes the above mentioned fix for setting the CACertFile option
     //vCurl.CACertFile := 'curl-ca-bundle.crt';
 
 
     edtReturnCode.Text := IntToStr(vCurl.Request(fURI.Address, 'GET', 0, vInHeader, vInData, vInDataType, SockString(vHeaders), SockString(vBody)));
-    memBody.Text := string(vBody);
-
-    //Bug?  Body works with a simple assignment, headers requires a new string?
-    //memHeaders.Text := string(vHeaders);
-    SetString(vHeaderText, PAnsiChar(vHeaders), Length(vHeaders));
-    memHeaders.Text := vHeaderText;
+    memBody.Text := utf8tostring(vBody);
+    memHeaders.Text := utf8tostring(vHeaders);
   finally
     vCurl.Free();
   end;
